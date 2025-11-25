@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lays Configurator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div id="ui">
+      <h1>Lay's configurator</h1>
+
+      <label>
+        Naam
+        <input id="naamInput" type="text" placeholder="Test Chips" />
+      </label>
+
+      <label>
+        Smaak
+        <select id="smaakSelect">
+          <option value="Paprika">Paprika</option>
+          <option value="Naturel">Naturel</option>
+          <option value="BBQ">BBQ</option>
+          <option value="Pickles">Pickles</option>
+        </select>
+      </label>
+
+      <button id="opslaanBtn">Verstuur naar API</button>
+
+      <p id="status"></p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

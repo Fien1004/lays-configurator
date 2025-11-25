@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+}
+
+#canvas {
+  display: block;
+}
+
+#ui {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+button {
+  margin-top: 6px;
+  cursor: pointer;
+}
