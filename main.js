@@ -69,7 +69,7 @@ opslaanBtn.addEventListener("click", async () => {
   statusP.textContent = "Bezig met versturen..."
 
   try {
-    const res = await fetch("http://localhost:3000/bag", {
+    const res = await fetch("https://lays-api-6rne.onrender.com/bag", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
