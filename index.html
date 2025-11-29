@@ -16,14 +16,21 @@
       </label>
 
       <label>
-        Smaak
-        <select id="smaakSelect">
-          <option value="Paprika">Paprika</option>
-          <option value="Naturel">Naturel</option>
-          <option value="BBQ">BBQ</option>
-          <option value="Pickles">Pickles</option>
-        </select>
+        Kleur
+        <input id="kleurInput" type="color" value="#ffcc00" />
       </label>
+
+      <label>
+        Smaak kiezen
+        <select id="smaakSelect"></select>
+      </label>
+
+      <label>
+        Nieuwe smaak toevoegen
+        <input id="nieuweSmaakInput" type="text" placeholder="Bijv. Sour Cream" />
+      </label>
+
+      <button id="voegSmaakToeBtn">Voeg smaak toe</button>
 
       <button id="opslaanBtn">Verstuur naar API</button>
 
