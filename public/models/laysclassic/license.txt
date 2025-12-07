@@ -1,0 +1,11 @@
+Model Information:
+* title:	Lay's+Classic
+* source:	https://sketchfab.com/3d-models/laysclassic-683c14c972a14f5396b7d423a26e8625
+* author:	eyes360vr (https://sketchfab.com/eyes360vr)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Lay's+Classic" (https://sketchfab.com/3d-models/laysclassic-683c14c972a14f5396b7d423a26e8625) by eyes360vr (https://sketchfab.com/eyes360vr) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

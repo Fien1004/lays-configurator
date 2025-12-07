@@ -1,12 +1,20 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { TextureLoader } from "three";
+import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
 
 // Canvas
 const canvas = document.getElementById("canvas");
 
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color("#f0f0f0");
+
+// Environment map (PNG)
+const envTexture = new TextureLoader().load("/environments/environment1.png");
+envTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+scene.environment = null;
+scene.background = envTexture;
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -24,18 +32,55 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // Licht
 scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-dirLight.position.set(3, 5, 4);
+dirLight.position.set(2, 4, 3);
+dirLight.intensity = 0.9;
+dirLight.castShadow = true;
 scene.add(dirLight);
+
+// Front light
+const frontLight = new THREE.DirectionalLight(0xffffff, 1.2);
+frontLight.position.set(0, 2, 4); 
+frontLight.castShadow = false;
+scene.add(frontLight);
+
+// Rim light voor mooie randjes
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+rimLight.position.set(-4, 3, -2);
+scene.add(rimLight);
+
+// Fill light om schaduwen zachter te maken
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+fillLight.position.set(2, 1, -2);
+scene.add(fillLight);
+
+// Vloer
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(4, 4),
+  new THREE.MeshStandardMaterial({ color: "#ffffff" })
+);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = 0;
+floor.receiveShadow = true;
+scene.add(floor);
+
 
 // Chipszak
 const geo = new THREE.BoxGeometry(1, 1.6, 0.4, 16, 16, 16);
-const mat = new THREE.MeshStandardMaterial({ color: "#ffcc00", roughness: 0.4 });
+const mat = new THREE.MeshStandardMaterial({
+  color: "#ffcc00",
+  roughness: 0.4,
+  metalness: 0.1
+  
+});
 const bag = new THREE.Mesh(geo, mat);
-bag.position.y = 0;
+bag.castShadow = true;
+bag.position.y = 0.8;
 scene.add(bag);
 
 // Vervorming voor zachtere zak
@@ -155,6 +200,24 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+const gui = new GUI();
+
+// Licht map
+const lightFolder = gui.addFolder("Licht");
+lightFolder.add(dirLight, "intensity", 0, 2, 0.01).name("Sterkte");
+
+// Product map
+const bagFolder = gui.addFolder("Chipszak");
+bagFolder.add(bag.rotation, "y", -Math.PI, Math.PI, 0.01).name("Rotatie");
+bagFolder.add(bag.scale, "x", 0.5, 2, 0.01).name("Schaal X");
+bagFolder.add(bag.scale, "y", 0.5, 2, 0.01).name("Schaal Y");
+bagFolder.add(bag.scale, "z", 0.5, 2, 0.01).name("Schaal Z");
+
+lightFolder.open();
+bagFolder.open();
+
+
 
 // Animatie
 function animate() {

@@ -5,6 +5,13 @@ body {
   overflow: hidden;
 }
 
+#logo {
+  width: 70px;
+  display: block;
+  margin: 0 auto 5px auto;
+}
+
+
 /* Canvas */
 #canvas {
   width: 100vw;
