@@ -61,10 +61,15 @@ scene.add(fillLight);
 
 // Vloer
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(4, 4),
+  new THREE.CylinderGeometry(
+    1.5,   // radius
+    1.5,   // radius
+    0.1,   // hoogte = dikte
+    64     // segments
+  ),
   new THREE.MeshStandardMaterial({ color: "#ffffff" })
 );
-floor.rotation.x = -Math.PI / 2;
+floor.rotation.x = 0;
 floor.position.y = 0;
 floor.receiveShadow = true;
 scene.add(floor);
