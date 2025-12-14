@@ -68,8 +68,6 @@ controls.minAzimuthAngle = -Math.PI * 0.25
 controls.maxAzimuthAngle = Math.PI * 0.25
 controls.minPolarAngle = Math.PI * 0.35
 controls.maxPolarAngle = Math.PI * 0.65
-controls.minDistance = 1.8
-controls.maxDistance = 2.6
 controls.target.set(0, 0.45, 0)
 controls.update()
 
