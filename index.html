@@ -9,36 +9,49 @@
   <body>
     <div id="ui">
       <img src="Logo.png" id="logo" alt="Lay's logo">
-      <h1>Lay's configurator</h1>
+  <h1>Maak je chipszak</h1>
 
-      <label>
-        Naam
-        <input id="naamInput" type="text" placeholder="Chipsnaam" />
-      </label>
+  <label>
+    Geef de chipszak een naam
+    <input
+      id="naamInput"
+      type="text"
+      placeholder="Bijv. Mijn Chipszak"
+      maxlength="16"
+    />
+  </label>
 
-      <label>
-        Kleur
-        <input id="kleurInput" type="color" value="#ffcc00" />
-      </label>
+  <label>
+  Smaak
+  <input
+    id="smaakInput"
+    type="text"
+    placeholder="Bijv. Paprika"
+    maxlength="20"
+  />
+</label>
 
-      <label>
-        Smaak kiezen
-        <select id="smaakSelect"></select>
-      </label>
 
-      <label>
-        Nieuwe smaak toevoegen
-        <input id="nieuweSmaakInput" type="text" placeholder="Bijv. Sour Cream" />
-      </label>
+<div class="kleur-selectie">
+  <p>Kies een kleur</p>
 
-      <button id="voegSmaakToeBtn">Voeg smaak toe</button>
+  <div class="kleur-bolletjes">
+    <button class="kleur-btn active" data-color="#F1B11B"></button>
+    <button class="kleur-btn" data-color="#EF1C24"></button>
+    <button class="kleur-btn" data-color="#1e5ceb"></button>
+  </div>
+</div>
 
-      <button id="opslaanBtn">Verstuur naar API</button>
 
-      <p id="status"></p>
-    </div>
 
-    <canvas id="canvas"></canvas>
-    <script type="module" src="main.js"></script>
+  <button id="opslaanBtn" disabled>Indienen</button>
+
+  <p id="status"></p>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script type="module" src="main.js"></script>
+
   </body>
 </html>
