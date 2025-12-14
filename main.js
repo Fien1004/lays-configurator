@@ -1,39 +1,44 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { TextureLoader } from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
+import gsap from "gsap"
 
-// Canvas
+/* ================= UI ================= */
+const naamInput = document.getElementById("naamInput")
+const smaakInput = document.getElementById("smaakInput")
+const kleurButtons = document.querySelectorAll(".kleur-btn")
+const opslaanBtn = document.getElementById("opslaanBtn")
+const statusP = document.getElementById("status")
+
+const config = {
+  naam: "",
+  smaak: "",
+  kleur: "#F1B11B"
+}
+
+function updateSubmitState() {
+  opslaanBtn.disabled = !(config.naam && config.smaak)
+}
+updateSubmitState()
+
+/* ================= THREE ================= */
 const canvas = document.getElementById("canvas")
-
-// Scene
 const scene = new THREE.Scene()
 
-// Environment background
 const envTexture = new TextureLoader().load("/environments/environment1.png")
 envTexture.mapping = THREE.EquirectangularReflectionMapping
 scene.background = envTexture
-scene.environment = null
 
-// Camera
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-)
-camera.position.set(0, 0, 1.8)
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
+camera.position.set(0, 0.3, 2)
 
-// Renderer
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: true
-})
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.shadowMap.enabled = true
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
-// Licht
+/* ================= LIGHTS ================= */
 scene.add(new THREE.AmbientLight(0xffffff, 0.8))
 
 const dirLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -41,150 +46,201 @@ dirLight.position.set(2, 4, 3)
 dirLight.castShadow = true
 scene.add(dirLight)
 
-const frontLight = new THREE.DirectionalLight(0xffffff, 1.2)
+const frontLight = new THREE.DirectionalLight(0xffffff, 1)
 frontLight.position.set(0, 2, 4)
 scene.add(frontLight)
 
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.6)
-rimLight.position.set(-4, 3, -2)
-scene.add(rimLight)
-
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.4)
-fillLight.position.set(2, 1, -2)
-scene.add(fillLight)
-
-// Vloer
+/* ================= FLOOR ================= */
 const floor = new THREE.Mesh(
-  new THREE.CylinderGeometry(1.5, 1.5, 0.1, 100),
+  new THREE.CylinderGeometry(1.5, 1.5, 0.1, 64),
   new THREE.MeshStandardMaterial({ color: "#ffffff" })
 )
-floor.receiveShadow = true
-floor.position.y = -0.8
-floor.position.z = -0.2
+floor.position.set(0, -0.8, -0.2)
 floor.scale.set(1.4, 1, 1.4)
+floor.receiveShadow = true
 scene.add(floor)
 
-// Chipszak
-const bagGeometry = new THREE.BoxGeometry(1, 1.6, 0.4, 16, 16, 16)
-const bagMaterial = new THREE.MeshStandardMaterial({
-  color: "#F1B11B",
-  roughness: 0.4,
-  metalness: 0.1
-})
-const bag = new THREE.Mesh(bagGeometry, bagMaterial)
-bag.position.y = 0
-bag.castShadow = true
-scene.add(bag)
-
-// Zachte vervorming
-for (let i = 0; i < bagGeometry.attributes.position.count; i++) {
-  const y = bagGeometry.attributes.position.getY(i)
-  if (y > 0.5 || y < -0.5) {
-    bagGeometry.attributes.position.setZ(i, Math.sin(y * 3) * 0.08)
-  }
-}
-bagGeometry.computeVertexNormals()
-
-// Controls
+/* ================= CONTROLS ================= */
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
-controls.minDistance = 1.6
-controls.maxDistance = 3
-controls.maxPolarAngle = Math.PI / 2
-controls.target.set(0, 0, 0)
+controls.enablePan = false
+controls.minAzimuthAngle = -Math.PI * 0.25
+controls.maxAzimuthAngle = Math.PI * 0.25
+controls.minPolarAngle = Math.PI * 0.35
+controls.maxPolarAngle = Math.PI * 0.65
+controls.minDistance = 1.8
+controls.maxDistance = 2.6
+controls.target.set(0, 0.45, 0)
 controls.update()
 
-// UI
-const naamInput = document.getElementById("naamInput")
-const smaakInput = document.getElementById("smaakInput")
-const kleurButtons = document.querySelectorAll(".kleur-btn")
-const opslaanBtn = document.getElementById("opslaanBtn")
-const statusP = document.getElementById("status")
-
-// State
-const config = {
-  naam: "",
-  smaak: "",
-  kleur: "#F1B11B"
+/* ================= CAMERA ANIM ================= */
+const cameraPos = {
+  default: { x: 0, y: 0.3, z: 2 },
+  name: { x: 0, y: 0.38, z: 1.85 },
+  flavor: { x: 0.08, y: 0.36, z: 1.9 },
+  color: { x: 0, y: 0.32, z: 2.1 }
 }
 
-// Helper
-function updateSubmitState() {
-  opslaanBtn.disabled = !(config.naam && config.smaak)
+function moveCamera(pos) {
+  gsap.to(camera.position, {
+    x: pos.x,
+    y: pos.y,
+    z: pos.z,
+    duration: 0.6,
+    ease: "power2.out",
+    onUpdate: () => controls.update()
+  })
 }
 
-// Naam input
+/* ================= MODEL + TEXT PLANE ================= */
+let bagRoot = null
+let textPlane = null
+let textTexture = null
+
+function createTextPlane(text) {
+  if (!textTexture) {
+    const canvas = document.createElement("canvas")
+    canvas.width = 512
+    canvas.height = 128
+
+    const ctx = canvas.getContext("2d")
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    ctx.fillStyle = "#000000"
+    ctx.font = "bold 72px Arial"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+
+    textTexture = new THREE.CanvasTexture(canvas)
+
+    const material = new THREE.MeshStandardMaterial({
+      map: textTexture,
+      transparent: true,
+      roughness: 0.7,
+      metalness: 0
+    })
+
+    const geometry = new THREE.PlaneGeometry(0.7, 0.18)
+    textPlane = new THREE.Mesh(geometry, material)
+  } else {
+    const ctx = textTexture.image.getContext("2d")
+    ctx.clearRect(0, 0, 512, 128)
+    ctx.fillStyle = "#000000"
+    ctx.font = "bold 72px Arial"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    ctx.fillText(text, 256, 64)
+    textTexture.needsUpdate = true
+  }
+
+  return textPlane
+}
+
+new GLTFLoader().load("/models/chips_arthur_de_klerck.glb", gltf => {
+  bagRoot = gltf.scene
+  bagRoot.scale.set(0.6, 0.6, 0.6)
+  bagRoot.position.set(0, 0.3, 0)
+  bagRoot.rotation.set(0.3, 0.5, 0)
+
+  bagRoot.traverse(c => {
+    if (c.isMesh) {
+      c.castShadow = true
+      c.receiveShadow = true
+    }
+  })
+
+  const box = new THREE.Box3().setFromObject(bagRoot)
+  const size = new THREE.Vector3()
+  const center = new THREE.Vector3()
+  box.getSize(size)
+  box.getCenter(center)
+
+  textPlane = createTextPlane("")
+    textPlane.position.set(
+    center.x - 0.21,
+    center.y - 0.2,
+  box.max.z - 0.58,
+  
+// Counter-rotate so the text reads straight on the bag
+textPlane.rotation.set(0, -0.45, 0)
+)
+
+  textPlane.renderOrder = 10
+
+
+
+  bagRoot.add(textPlane)
+  scene.add(bagRoot)
+})
+
+function updateBagColor(kleur) {
+  if (!bagRoot) return
+  bagRoot.traverse(c => {
+    if (c.isMesh && c.material?.color) {
+      c.material.color.set(kleur)
+    }
+  })
+}
+
+/* ================= UI EVENTS ================= */
+naamInput.addEventListener("focus", () => moveCamera(cameraPos.name))
 naamInput.addEventListener("input", () => {
-  let value = naamInput.value
-  value = value.replace(/[^a-zA-Z0-9 ]/g, "")
-  value = value.slice(0, 16).toUpperCase()
+  const v = naamInput.value.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 10).toUpperCase()
+  naamInput.value = v
+  config.naam = v
 
-  naamInput.value = value
-  config.naam = value
-
+  if (textPlane) createTextPlane(v)
   updateSubmitState()
 })
 
-// Smaak input
+smaakInput.addEventListener("focus", () => moveCamera(cameraPos.flavor))
 smaakInput.addEventListener("input", () => {
-  let value = smaakInput.value
-  value = value.replace(/[^a-zA-Z0-9 ]/g, "")
-  value = value.slice(0, 20)
-
-  smaakInput.value = value
-  config.smaak = value
-
+  const v = smaakInput.value.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 20)
+  smaakInput.value = v
+  config.smaak = v
   updateSubmitState()
 })
 
-// Kleur kiezen
 kleurButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     kleurButtons.forEach(b => b.classList.remove("active"))
     btn.classList.add("active")
-
-    const kleur = btn.dataset.color
-    config.kleur = kleur
-    bagMaterial.color.set(kleur)
+    config.kleur = btn.dataset.color
+    updateBagColor(config.kleur)
+    moveCamera(cameraPos.color)
   })
 })
 
-// Submit
 opslaanBtn.addEventListener("click", async () => {
   statusP.textContent = "Bezig met versturen..."
-
-  const payload = {
-    naam: config.naam,
-    smaak: config.smaak,
-    kleur: config.kleur,
-    datum: new Date().toISOString()
-  }
-
   try {
-    const res = await fetch("https://lays-api-6rne.onrender.com/bag", {
+    await fetch("https://lays-api-6rne.onrender.com/bag", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        naam: config.naam,
+        smaak: config.smaak,
+        kleur: config.kleur,
+        datum: new Date().toISOString()
+      })
     })
-
-    await res.json()
     statusP.textContent = "Inzending opgeslagen"
+    moveCamera(cameraPos.default)
   } catch {
     statusP.textContent = "Fout bij opslaan"
   }
 })
 
-// Resize
+/* ================= LOOP ================= */
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
   renderer.setSize(window.innerWidth, window.innerHeight)
 })
 
-// Animate
 function animate() {
   requestAnimationFrame(animate)
-  bag.rotation.y += 0.006
   controls.update()
   renderer.render(scene, camera)
 }
