@@ -120,7 +120,7 @@ let textMesh = null
 new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
   bagRoot = gltf.scene
   bagRoot.scale.set(0.7, 0.7, 0.7)
-  bagRoot.position.set(0, 0.3, 0)
+  bagRoot.position.set(0, 0.5, 0)
   bagRoot.rotation.set(0.3, 0.5, 0)
 
   bagRoot.traverse(c => {
