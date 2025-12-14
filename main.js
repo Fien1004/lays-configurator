@@ -56,6 +56,7 @@ const floor = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: "#ffffff" })
 )
 floor.position.set(0, -0.8, -0.2)
+floor.scale.set(1.4, 1, 1.4)
 floor.receiveShadow = true
 scene.add(floor)
 
@@ -63,12 +64,18 @@ scene.add(floor)
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 controls.enablePan = false
+controls.minAzimuthAngle = -Math.PI * 0.25
+controls.maxAzimuthAngle = Math.PI * 0.25
+controls.minPolarAngle = Math.PI * 0.35
+controls.maxPolarAngle = Math.PI * 0.65
+controls.minDistance = 1.8
+controls.maxDistance = 2.6
 controls.target.set(0, 0.45, 0)
 controls.update()
 
 /* ================= CAMERA ANIM ================= */
 const cameraPos = {
-  default: { x: 0, y: 0.6, z: 2 },
+  default: { x: 0, y: 0.3, z: 2 },
   name: { x: 0, y: 0.38, z: 0.8 },
   flavor: { x: 0.08, y: 0.36, z: 1.9 },
   color: { x: 0, y: 0.32, z: 2.1 }
@@ -114,7 +121,7 @@ let textMesh = null
 
 new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
   bagRoot = gltf.scene
-  bagRoot.scale.set(0.6, 0.6, 0.6)
+  bagRoot.scale.set(0.7, 0.7, 0.7)
   bagRoot.position.set(0, 0.3, 0)
   bagRoot.rotation.set(0.3, 0.5, 0)
 
