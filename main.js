@@ -9,7 +9,6 @@ const naamInput = document.getElementById("naamInput")
 const smaakInput = document.getElementById("smaakInput")
 const kleurButtons = document.querySelectorAll(".kleur-btn")
 const opslaanBtn = document.getElementById("opslaanBtn")
-const statusP = document.getElementById("status")
 
 const config = {
   naam: "",
@@ -30,8 +29,13 @@ const envTexture = new TextureLoader().load("/environments/environment1.png")
 envTexture.mapping = THREE.EquirectangularReflectionMapping
 scene.background = envTexture
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
-camera.position.set(0, 0.3, 2)
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+)
+camera.position.set(0, 0.6, 2)
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -46,17 +50,12 @@ dirLight.position.set(2, 4, 3)
 dirLight.castShadow = true
 scene.add(dirLight)
 
-const frontLight = new THREE.DirectionalLight(0xffffff, 1)
-frontLight.position.set(0, 2, 4)
-scene.add(frontLight)
-
 /* ================= FLOOR ================= */
 const floor = new THREE.Mesh(
   new THREE.CylinderGeometry(1.5, 1.5, 0.1, 64),
   new THREE.MeshStandardMaterial({ color: "#ffffff" })
 )
 floor.position.set(0, -0.8, -0.2)
-floor.scale.set(1.4, 1, 1.4)
 floor.receiveShadow = true
 scene.add(floor)
 
@@ -64,19 +63,13 @@ scene.add(floor)
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 controls.enablePan = false
-controls.minAzimuthAngle = -Math.PI * 0.25
-controls.maxAzimuthAngle = Math.PI * 0.25
-controls.minPolarAngle = Math.PI * 0.35
-controls.maxPolarAngle = Math.PI * 0.65
-controls.minDistance = 1.8
-controls.maxDistance = 2.6
 controls.target.set(0, 0.45, 0)
 controls.update()
 
 /* ================= CAMERA ANIM ================= */
 const cameraPos = {
-  default: { x: 0, y: 0.3, z: 2 },
-  name: { x: 0, y: 0.38, z: 1.85 },
+  default: { x: 0, y: 0.6, z: 2 },
+  name: { x: 0, y: 0.38, z: 0.8 },
   flavor: { x: 0.08, y: 0.36, z: 1.9 },
   color: { x: 0, y: 0.32, z: 2.1 }
 }
@@ -92,113 +85,125 @@ function moveCamera(pos) {
   })
 }
 
-/* ================= MODEL + TEXT PLANE ================= */
-let bagRoot = null
-let textPlane = null
-let textTexture = null
+/* ================= TEXTURE ================= */
+function createTextTexture(text) {
+  const c = document.createElement("canvas")
+  c.width = 1024
+  c.height = 256
 
-function createTextPlane(text) {
-  if (!textTexture) {
-    const canvas = document.createElement("canvas")
-    canvas.width = 512
-    canvas.height = 128
+  const ctx = c.getContext("2d")
+  ctx.clearRect(0, 0, c.width, c.height)
 
-    const ctx = canvas.getContext("2d")
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = "#dbd5d5"
+  ctx.font = "900 150px Arial"
+  ctx.textAlign = "center"
+  ctx.textBaseline = "middle"
 
-    ctx.fillStyle = "#000000"
-    ctx.font = "bold 72px Arial"
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+  ctx.fillText(text, c.width / 2, c.height / 2)
 
-    textTexture = new THREE.CanvasTexture(canvas)
-
-    const material = new THREE.MeshStandardMaterial({
-      map: textTexture,
-      transparent: true,
-      roughness: 0.7,
-      metalness: 0
-    })
-
-    const geometry = new THREE.PlaneGeometry(0.7, 0.18)
-    textPlane = new THREE.Mesh(geometry, material)
-  } else {
-    const ctx = textTexture.image.getContext("2d")
-    ctx.clearRect(0, 0, 512, 128)
-    ctx.fillStyle = "#000000"
-    ctx.font = "bold 72px Arial"
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.fillText(text, 256, 64)
-    textTexture.needsUpdate = true
-  }
-
-  return textPlane
+  const texture = new THREE.CanvasTexture(c)
+  texture.flipY = false
+  texture.needsUpdate = true
+  return texture
 }
 
-new GLTFLoader().load("/models/chips_arthur_de_klerck.glb", gltf => {
+/* ================= MODEL ================= */
+let bagRoot = null
+let bagMesh = null
+let textMesh = null
+
+new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
   bagRoot = gltf.scene
   bagRoot.scale.set(0.6, 0.6, 0.6)
   bagRoot.position.set(0, 0.3, 0)
   bagRoot.rotation.set(0.3, 0.5, 0)
 
   bagRoot.traverse(c => {
-    if (c.isMesh) {
-      c.castShadow = true
-      c.receiveShadow = true
+    if (!c.isMesh) return
+
+    c.castShadow = true
+    c.receiveShadow = true
+
+    if (c.name === "Plane_Bag") {
+      bagMesh = c
+      bagMesh.material = new THREE.MeshStandardMaterial({
+        color: config.kleur,
+        roughness: 0.3,
+        metalness: 0.1,
+        envMapIntensity: 0.2,
+        flatShading: false
+      })
+    }
+
+    if (c.name === "Plane_Logo") {
+      c.castShadow = false
+      c.receiveShadow = false
+
+      if (c.material) {
+        c.material.transparent = true
+        c.material.depthWrite = false
+        c.material.polygonOffset = true
+        c.material.polygonOffsetFactor = -2
+        c.material.polygonOffsetUnits = -2
+        c.material.needsUpdate = true
+      }
+
+      c.renderOrder = 20
+    }
+
+    if (c.name === "Plane_Text") {
+      textMesh = c
+      textMesh.material = new THREE.MeshBasicMaterial({
+        transparent: true
+      })
+
+      const initialText = "Mijn Chipszak"
+      textMesh.material.map = createTextTexture(initialText)
+      textMesh.material.needsUpdate = true
+
+      config.naam = initialText
+      naamInput.value = initialText
+      updateSubmitState()
+
+      c.renderOrder = 30
+    }
+
+    if (c.name === "Plane_Bottom") {
+      c.visible = false
+      c.castShadow = false
+      c.receiveShadow = false
+
+      if (c.material) {
+        c.material.depthWrite = true
+        c.material.needsUpdate = true
+      }
+
+      c.renderOrder = 10
     }
   })
-
-  const box = new THREE.Box3().setFromObject(bagRoot)
-  const size = new THREE.Vector3()
-  const center = new THREE.Vector3()
-  box.getSize(size)
-  box.getCenter(center)
-
-  textPlane = createTextPlane("")
-    textPlane.position.set(
-    center.x - 0.21,
-    center.y - 0.2,
-  box.max.z - 0.58,
   
-// Counter-rotate so the text reads straight on the bag
-textPlane.rotation.set(0, -0.45, 0)
-)
 
-  textPlane.renderOrder = 10
-
-
-
-  bagRoot.add(textPlane)
   scene.add(bagRoot)
 })
 
-function updateBagColor(kleur) {
-  if (!bagRoot) return
-  bagRoot.traverse(c => {
-    if (c.isMesh && c.material?.color) {
-      c.material.color.set(kleur)
-    }
-  })
-}
-
 /* ================= UI EVENTS ================= */
 naamInput.addEventListener("focus", () => moveCamera(cameraPos.name))
-naamInput.addEventListener("input", () => {
-  const v = naamInput.value.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 10).toUpperCase()
+naamInput.addEventListener("input", e => {
+  const v = e.target.value.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 20)
   naamInput.value = v
   config.naam = v
 
-  if (textPlane) createTextPlane(v)
+  if (textMesh) {
+    textMesh.material.map = v ? createTextTexture(v) : null
+    textMesh.material.needsUpdate = true
+  }
+
   updateSubmitState()
 })
 
 smaakInput.addEventListener("focus", () => moveCamera(cameraPos.flavor))
-smaakInput.addEventListener("input", () => {
-  const v = smaakInput.value.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 20)
-  smaakInput.value = v
-  config.smaak = v
+smaakInput.addEventListener("input", e => {
+  config.smaak = e.target.value
   updateSubmitState()
 })
 
@@ -206,14 +211,16 @@ kleurButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     kleurButtons.forEach(b => b.classList.remove("active"))
     btn.classList.add("active")
+
     config.kleur = btn.dataset.color
-    updateBagColor(config.kleur)
+    if (bagMesh) bagMesh.material.color.set(config.kleur)
+
     moveCamera(cameraPos.color)
   })
 })
 
 opslaanBtn.addEventListener("click", async () => {
-  statusP.textContent = "Bezig met versturen..."
+  const statusP = document.getElementById("status")
   try {
     await fetch("https://lays-api-6rne.onrender.com/bag", {
       method: "POST",
