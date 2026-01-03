@@ -11,19 +11,17 @@ body {
   margin: 0 auto 5px auto;
 }
 
-/* Canvas */
 #canvas {
   width: 100vw;
   height: 100vh;
   display: block;
 }
 
-/* UI container */
 #ui {
   position: absolute;
   top: 20px;
   left: 20px;
-  width: 250px;
+  width: 260px;
   padding: 16px;
   background: white;
   border-radius: 12px;
@@ -34,14 +32,12 @@ body {
   z-index: 10;
 }
 
-/* Titel */
 #ui h1 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
 }
 
-/* Labels en inputs */
 label {
   display: flex;
   flex-direction: column;
@@ -62,7 +58,6 @@ input[type="text"]::placeholder {
   opacity: 0.6;
 }
 
-/* Kleur selectie */
 .kleur-selectie {
   display: flex;
   flex-direction: column;
@@ -80,7 +75,6 @@ input[type="text"]::placeholder {
   gap: 12px;
 }
 
-/* Kleur bolletjes */
 .kleur-btn {
   width: 32px;
   height: 32px;
@@ -90,24 +84,14 @@ input[type="text"]::placeholder {
   padding: 0;
 }
 
-.kleur-btn[data-color="#F1B11B"] {
-  background: #F1B11B;
-}
-
-.kleur-btn[data-color="#EF1C24"] {
-  background: #EF1C24;
-}
-
-.kleur-btn[data-color="#1e5ceb"] {
-  background: #1e5ceb;
-}
+.kleur-btn[data-color="#F1B11B"] { background: #F1B11B; }
+.kleur-btn[data-color="#EF1C24"] { background: #EF1C24; }
+.kleur-btn[data-color="#1e5ceb"] { background: #1e5ceb; }
 
 .kleur-btn.active {
   border-color: #000;
 }
 
-
-/* Knoppen */
 button {
   padding: 10px 12px;
   border: none;
@@ -119,21 +103,146 @@ button {
   transition: background 0.15s, opacity 0.15s;
 }
 
-button:hover:not(:disabled) {
-  background: #e6b82c;
-}
-
-button:active:not(:disabled) {
-  background: #d0a528;
-}
+button:hover:not(:disabled) { background: #e6b82c; }
+button:active:not(:disabled) { background: #d0a528; }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Status melding */
 #status {
   font-size: 13px;
   margin-top: 4px;
+}
+
+.auth {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.reset-btn {
+  background: #ff5959;
+  color: white;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: #e64a4a;
+}
+
+#authStatus {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* VOTE OVERLAY */
+.vote-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.vote-overlay.hidden {
+  display: none;
+}
+
+.vote-card {
+  width: min(520px, 92vw);
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vote-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vote-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: #ededed;
+  font-weight: 600;
+}
+
+.close-btn:hover:not(:disabled) {
+  background: #dedede;
+}
+
+.vote-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #fafafa;
+}
+
+.vote-color {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.vote-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vote-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.vote-flavor {
+  font-size: 14px;
+  color: #666;
+}
+
+.vote-controls {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 10px;
+}
+
+.vote-btn {
+  background: #ffd633;
+}
+
+.vote-status {
+  margin: 0;
+  font-size: 13px;
+  color: #333;
 }
