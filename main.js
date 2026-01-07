@@ -348,6 +348,13 @@ new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
       c.renderOrder = 30
     }
 
+    if (c.name === "Plane_Bottom") {
+      imageMesh = c
+      imageMesh.visible = true
+      imageMesh.material = new THREE.MeshBasicMaterial({ transparent: true })
+      c.renderOrder = 30
+    }
+
     if (c.name === "Plane_Image" || c.name === "Plane_Topping" || c.name === "Plane_Bottom") {
       imageMesh = c
       imageMesh.visible = true
