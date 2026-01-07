@@ -9,43 +9,119 @@
   <body>
     <div id="ui">
       <img src="Logo.png" id="logo" alt="Lay's logo" />
-      <h1>Maak je chipszak</h1>
+      <h1>Do Us a Flavour - Configurator</h1>
 
-      <div class="auth">
-        <p class="auth-title">Jouw gegevens</p>
-
-        <input id="userNameInput" type="text" placeholder="Gebruikersnaam" maxlength="20" />
-        <input id="userEmailInput" type="text" placeholder="Email" maxlength="50" />
-
-        <div class="auth-actions">
-          <button id="startBtn">Start</button>
-          <button id="resetBtn" class="reset-btn" type="button">Reset</button>
-        </div>
-
-        <p id="authStatus"></p>
-      </div>
-
-      <label>
-        Naam van de chipszak
-        <input id="naamInput" type="text" placeholder="Bijv. Mijn Chipszak" maxlength="20" />
-      </label>
-
-      <label>
-        Smaak
-        <input id="smaakInput" type="text" placeholder="Bijv. Paprika" maxlength="20" />
-      </label>
-
-      <div class="kleur-selectie">
-        <p>Kies een kleur</p>
-        <div class="kleur-bolletjes">
-          <button class="kleur-btn active" data-color="#F1B11B"></button>
-          <button class="kleur-btn" data-color="#EF1C24"></button>
-          <button class="kleur-btn" data-color="#1e5ceb"></button>
+      <div class="wizard-head">
+        <div class="wizard-title">Configureer je zak</div>
+        <div class="wizard-dots" aria-label="Stappen">
+          <button id="dot1" class="dot active" type="button">1</button>
+          <button id="dot2" class="dot" type="button">2</button>
+          <button id="dot3" class="dot" type="button">3</button>
+          <button id="dot4" class="dot" type="button">4</button>
         </div>
       </div>
 
-      <button id="opslaanBtn" disabled>Indienen</button>
-      <p id="status"></p>
+      <div id="step1" class="step">
+        <div class="step-title">Stap 1: Jouw gegevens</div>
+
+        <div class="auth">
+          <p class="auth-title">Jouw gegevens</p>
+
+          <input id="userNameInput" type="text" placeholder="Gebruikersnaam" maxlength="20" />
+          <input id="userEmailInput" type="text" placeholder="Email" maxlength="50" />
+
+          <div class="auth-actions">
+            <button id="startBtn" type="button">Start</button>
+            <button id="resetBtn" class="reset-btn" type="button">Reset</button>
+          </div>
+
+          <p id="authStatus"></p>
+        </div>
+
+        <div class="nav-row one">
+          <button id="nextBtnWizard" class="primary" type="button" disabled>Volgende</button>
+        </div>
+      </div>
+
+      <div id="step2" class="step hidden">
+        <div class="step-title">Stap 2: Jouw merk</div>
+
+        <label>
+          Merknaam
+          <input id="naamInput" type="text" placeholder="Bijv. Super Chips" maxlength="20" />
+        </label>
+
+        <div class="kleur-selectie">
+          <p>Kleur zak</p>
+          <div class="kleur-bolletjes">
+            <button class="kleur-btn active" type="button" data-color="#F1B11B" aria-label="Geel"></button>
+            <button class="kleur-btn" type="button" data-color="#EF1C24" aria-label="Rood"></button>
+            <button class="kleur-btn" type="button" data-color="#1e5ceb" aria-label="Blauw"></button>
+          </div>
+        </div>
+
+        <div class="nav-row two">
+          <button id="prevBtnWizard" type="button">Vorige</button>
+          <button id="nextBtnWizard2" class="primary" type="button" disabled>Volgende</button>
+        </div>
+      </div>
+
+      <div id="step3" class="step hidden">
+        <div class="step-title">Stap 3: Smaak</div>
+
+        <label>
+          Smaaknaam
+          <input id="smaakInput" type="text" placeholder="Bijv. Pikante Paprika" maxlength="20" />
+        </label>
+
+        <div class="nav-row two">
+          <button id="prevBtnWizard2" type="button">Vorige</button>
+          <button id="nextBtnWizard3" class="primary" type="button" disabled>Volgende</button>
+        </div>
+      </div>
+
+      <div id="step4" class="step hidden">
+        <div class="step-title">Stap 4: Kies een afbeelding</div>
+
+        <div class="img-grid" id="imgGrid">
+          <button class="img-card" type="button" data-img="pittig.png">
+            <img class="img-thumb" src="/images/pittig.png" alt="Pittig" />
+            <div class="img-lbl">Pittig</div>
+          </button>
+
+          <button class="img-card" type="button" data-img="romig.png">
+            <img class="img-thumb" src="/images/romig.png" alt="Romig" />
+            <div class="img-lbl">Romig</div>
+          </button>
+
+          <button class="img-card" type="button" data-img="zout.png">
+            <img class="img-thumb" src="/images/zout.png" alt="Zout" />
+            <div class="img-lbl">Zout</div>
+          </button>
+
+          <button class="img-card" type="button" data-img="kruidig.png">
+            <img class="img-thumb" src="/images/kruidig.png" alt="Kruidig" />
+            <div class="img-lbl">Kruidig</div>
+          </button>
+
+          <button class="img-card" type="button" data-img="gegrild.png">
+            <img class="img-thumb" src="/images/gegrild.png" alt="Gegrild" />
+            <div class="img-lbl">Gegrild</div>
+          </button>
+
+          <button class="img-card" type="button" data-img="fris.png">
+            <img class="img-thumb" src="/images/fris.png" alt="Fris" />
+            <div class="img-lbl">Fris</div>
+          </button>
+        </div>
+
+        <div class="nav-row two">
+          <button id="prevBtnWizard3" type="button">Vorige</button>
+          <button id="opslaanBtn" class="primary" disabled type="button">Insturen</button>
+        </div>
+
+        <p id="status"></p>
+      </div>
     </div>
 
     <div id="voteOverlay" class="vote-overlay hidden">
@@ -74,7 +150,6 @@
     </div>
 
     <canvas id="canvas"></canvas>
-
     <script type="module" src="main.js"></script>
   </body>
 </html>
