@@ -1,8 +1,10 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import { TextureLoader } from "three"
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 import gsap from "gsap"
+import { showLoader } from "./src/loaders/loader.js"
+import { textureLoader, gltfLoader } from "./src/loaders/three-loader-setup.js"
+
+showLoader()
 
 /* ================= UI ================= */
 const naamInput = document.getElementById("naamInput")
@@ -27,10 +29,8 @@ const voteName = document.getElementById("voteName")
 const voteFlavor = document.getElementById("voteFlavor")
 const voteColor = document.getElementById("voteColor")
 
-/* Optional preview image in vote popup */
 const votePreviewImg = document.getElementById("votePreviewImg")
 
-/* Wizard */
 const step1El = document.getElementById("step1")
 const step2El = document.getElementById("step2")
 const step3El = document.getElementById("step3")
@@ -173,14 +173,18 @@ function setStep(step) {
 const canvas = document.getElementById("canvas")
 const scene = new THREE.Scene()
 
-const envTexture = new TextureLoader().load("/environments/environment1.png")
+const envTexture = textureLoader.load("/environments/environment1.png")
 envTexture.mapping = THREE.EquirectangularReflectionMapping
 scene.background = envTexture
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
 camera.position.set(0, 0.6, 2)
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: true,
+  preserveDrawingBuffer: true
+})
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.shadowMap.enabled = true
@@ -251,13 +255,12 @@ function createTextTexture(text) {
 
 function getCanvasPreviewDataUrl() {
   try {
+    renderer.render(scene, camera)
     return renderer.domElement.toDataURL("image/jpeg", 0.7)
   } catch (e) {
     return ""
   }
 }
-
-const texLoader = new TextureLoader()
 
 let bagMesh = null
 let textMesh = null
@@ -269,7 +272,7 @@ function setImageOnBag(filename) {
 
   if (!imageMesh || !filename) return
 
-  texLoader.load(
+  textureLoader.load(
     `/images/${filename}`,
     tex => {
       tex.flipY = false
@@ -298,7 +301,7 @@ function setImageOnBag(filename) {
   )
 }
 
-new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
+gltfLoader.load("/models/Lays_Bag_Arthur.glb", gltf => {
   const bagRoot = gltf.scene
   bagRoot.scale.set(0.7, 0.7, 0.7)
   bagRoot.position.set(0, 0.5, 0)
@@ -538,7 +541,6 @@ if (imgGrid) {
   })
 }
 
-/* Wizard nav */
 if (dot1) dot1.addEventListener("click", () => setStep(1))
 if (dot2) dot2.addEventListener("click", () => {
   if (step1Valid()) setStep(2)
@@ -568,7 +570,6 @@ if (nextBtnWizard3) nextBtnWizard3.addEventListener("click", () => {
 })
 if (prevBtnWizard3) prevBtnWizard3.addEventListener("click", () => setStep(3))
 
-/* Auth */
 startBtn.addEventListener("click", async () => {
   authStatus.textContent = ""
   statusP.textContent = ""
@@ -602,7 +603,6 @@ resetBtn.addEventListener("click", () => {
   setStep(1)
 })
 
-/* Submit */
 opslaanBtn.addEventListener("click", async () => {
   statusP.textContent = ""
   voteStatus.textContent = ""
@@ -624,7 +624,6 @@ opslaanBtn.addEventListener("click", async () => {
   }
 })
 
-/* Vote overlay */
 closeVoteBtn.addEventListener("click", () => closeVoteOverlay())
 prevBtn.addEventListener("click", () => setCarouselIndex(carouselIndex - 1))
 nextBtn.addEventListener("click", () => setCarouselIndex(carouselIndex + 1))
@@ -649,7 +648,6 @@ voteBtn.addEventListener("click", async () => {
   }
 })
 
-/* ================= INIT ================= */
 const u = getUserInfo()
 if (u.name) userNameInput.value = u.name
 if (u.email) userEmailInput.value = u.email
@@ -665,7 +663,6 @@ updateWizardButtons()
 updateSubmitState()
 setStep(1)
 
-/* ================= LOOP ================= */
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
