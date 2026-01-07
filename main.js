@@ -27,6 +27,9 @@ const voteName = document.getElementById("voteName")
 const voteFlavor = document.getElementById("voteFlavor")
 const voteColor = document.getElementById("voteColor")
 
+/* Optional preview image in vote popup */
+const votePreviewImg = document.getElementById("votePreviewImg")
+
 /* Wizard */
 const step1El = document.getElementById("step1")
 const step2El = document.getElementById("step2")
@@ -129,9 +132,9 @@ function step4Valid() {
 }
 
 function updateWizardButtons() {
-  nextBtnWizard.disabled = !step1Valid()
-  nextBtnWizard2.disabled = !step2Valid()
-  nextBtnWizard3.disabled = !step3Valid()
+  if (nextBtnWizard) nextBtnWizard.disabled = !step1Valid()
+  if (nextBtnWizard2) nextBtnWizard2.disabled = !step2Valid()
+  if (nextBtnWizard3) nextBtnWizard3.disabled = !step3Valid()
 }
 
 function updateSubmitState() {
@@ -147,15 +150,15 @@ function updateSubmitState() {
 function setStep(step) {
   currentStep = Math.max(1, Math.min(4, step))
 
-  step1El.classList.toggle("hidden", currentStep !== 1)
-  step2El.classList.toggle("hidden", currentStep !== 2)
-  step3El.classList.toggle("hidden", currentStep !== 3)
-  step4El.classList.toggle("hidden", currentStep !== 4)
+  if (step1El) step1El.classList.toggle("hidden", currentStep !== 1)
+  if (step2El) step2El.classList.toggle("hidden", currentStep !== 2)
+  if (step3El) step3El.classList.toggle("hidden", currentStep !== 3)
+  if (step4El) step4El.classList.toggle("hidden", currentStep !== 4)
 
-  dot1.classList.toggle("active", currentStep === 1)
-  dot2.classList.toggle("active", currentStep === 2)
-  dot3.classList.toggle("active", currentStep === 3)
-  dot4.classList.toggle("active", currentStep === 4)
+  if (dot1) dot1.classList.toggle("active", currentStep === 1)
+  if (dot2) dot2.classList.toggle("active", currentStep === 2)
+  if (dot3) dot3.classList.toggle("active", currentStep === 3)
+  if (dot4) dot4.classList.toggle("active", currentStep === 4)
 
   if (currentStep === 1) moveCamera(cameraPos.default)
   if (currentStep === 2) moveCamera(cameraPos.name)
@@ -164,113 +167,6 @@ function setStep(step) {
 
   updateWizardButtons()
   updateSubmitState()
-}
-
-/* ================= API CALLS ================= */
-async function startGuestSession(username, email) {
-  const cleanName = (username || "").trim().slice(0, 20)
-  const cleanEmail = (email || "").trim().slice(0, 50)
-
-  if (!cleanName) throw new Error("Gebruikersnaam is verplicht")
-  if (!cleanEmail) throw new Error("Email is verplicht")
-  if (!cleanEmail.includes("@")) throw new Error("Email is niet geldig")
-
-  const res = await fetch(`${API_BASE}/user/guest`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: cleanEmail })
-  })
-
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.error || "Kon niet starten")
-  if (!data.token) throw new Error("Geen token ontvangen")
-
-  setToken(data.token)
-  setUserInfo(cleanName, cleanEmail)
-}
-
-async function loadBags() {
-  const res = await fetch(`${API_BASE}/bag`)
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.error || "Kon inzendingen niet laden")
-  return data
-}
-
-async function saveBag() {
-  const token = getToken()
-  if (!token) throw new Error("Klik eerst Start")
-
-  const user = getUserInfo()
-
-  const res = await fetch(`${API_BASE}/bag`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      naam: config.naam,
-      smaak: config.smaak,
-      kleur: config.kleur,
-      image: config.image,
-      submittedByName: user.name,
-      submittedByEmail: user.email
-    })
-  })
-
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.error || "Fout bij opslaan")
-  return data
-}
-
-async function voteForBag(bagId) {
-  const token = getToken()
-  if (!token) throw new Error("Klik eerst Start")
-  if (!hasSubmitted) throw new Error("Dien eerst je eigen chipszak in")
-
-  const res = await fetch(`${API_BASE}/vote/${bagId}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` }
-  })
-
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.error || "Stemmen faalde")
-  return data
-}
-
-/* ================= CAROUSEL ================= */
-function setCarouselIndex(i) {
-  if (!carouselBags.length) return
-  carouselIndex = (i + carouselBags.length) % carouselBags.length
-  renderCarousel()
-}
-
-function renderCarousel() {
-  if (!carouselBags.length) {
-    voteName.textContent = "Geen inzendingen"
-    voteFlavor.textContent = ""
-    voteColor.style.background = "#ddd"
-    voteBtn.disabled = true
-    prevBtn.disabled = true
-    nextBtn.disabled = true
-    return
-  }
-
-  const b = carouselBags[carouselIndex]
-  voteName.textContent = b.naam || "Zonder naam"
-  voteFlavor.textContent = b.smaak || ""
-  voteColor.style.background = b.kleur || "#ddd"
-
-  voteBtn.disabled = false
-  prevBtn.disabled = false
-  nextBtn.disabled = false
-}
-
-async function buildCarousel() {
-  const all = await loadBags()
-  carouselBags = (all || []).filter(b => b._id !== myBagId)
-  carouselIndex = 0
-  renderCarousel()
 }
 
 /* ================= THREE ================= */
@@ -298,7 +194,7 @@ scene.add(dirLight)
 
 const floor = new THREE.Mesh(
   new THREE.CylinderGeometry(1.5, 1.5, 0.1, 64),
-  new THREE.MeshStandardMaterial({ color: "#e86f3bff" })
+  new THREE.MeshStandardMaterial({ color: "#e86f3b" })
 )
 floor.position.set(0, -0.8, -0.2)
 floor.scale.set(1.4, 1, 1.4)
@@ -353,6 +249,14 @@ function createTextTexture(text) {
   return texture
 }
 
+function getCanvasPreviewDataUrl() {
+  try {
+    return renderer.domElement.toDataURL("image/jpeg", 0.7)
+  } catch (e) {
+    return ""
+  }
+}
+
 const texLoader = new TextureLoader()
 
 let bagMesh = null
@@ -360,8 +264,6 @@ let textMesh = null
 let imageMesh = null
 
 function setImageOnBag(filename) {
-  console.log("clicked image:", filename, "imageMesh?", !!imageMesh)
-
   config.image = filename || ""
   updateSubmitState()
 
@@ -370,8 +272,6 @@ function setImageOnBag(filename) {
   texLoader.load(
     `/images/${filename}`,
     tex => {
-      console.log("texture loaded ok:", `/images/${filename}`)
-
       tex.flipY = false
       tex.colorSpace = THREE.SRGBColorSpace
       tex.needsUpdate = true
@@ -390,8 +290,6 @@ function setImageOnBag(filename) {
 
       imageMesh.material = mat
       imageMesh.renderOrder = 999
-
-      console.log("material applied to:", imageMesh.name)
     },
     undefined,
     err => {
@@ -399,8 +297,6 @@ function setImageOnBag(filename) {
     }
   )
 }
-
-
 
 new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
   const bagRoot = gltf.scene
@@ -451,14 +347,6 @@ new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
 
       c.renderOrder = 30
     }
-    
-    if (c.name === "Plane_Bottom") {
-      imageMesh = c
-      imageMesh.visible = true
-      imageMesh.material = new THREE.MeshBasicMaterial({ transparent: true })
-      c.renderOrder = 30
-    }
-
 
     if (c.name === "Plane_Image" || c.name === "Plane_Topping" || c.name === "Plane_Bottom") {
       imageMesh = c
@@ -468,8 +356,6 @@ new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
       imageMesh.scale.set(0.75, 0.75, 0.75)
       c.renderOrder = 35
     }
-
-
   })
 
   scene.add(bagRoot)
@@ -478,6 +364,124 @@ new GLTFLoader().load("/models/Lays_Bag_Arthur.glb", gltf => {
   updateSubmitState()
   setStep(1)
 })
+
+/* ================= API CALLS ================= */
+async function startGuestSession(username, email) {
+  const cleanName = (username || "").trim().slice(0, 20)
+  const cleanEmail = (email || "").trim().slice(0, 50)
+
+  if (!cleanName) throw new Error("Gebruikersnaam is verplicht")
+  if (!cleanEmail) throw new Error("Email is verplicht")
+  if (!cleanEmail.includes("@")) throw new Error("Email is niet geldig")
+
+  const res = await fetch(`${API_BASE}/user/guest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: cleanEmail })
+  })
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || "Kon niet starten")
+  if (!data.token) throw new Error("Geen token ontvangen")
+
+  setToken(data.token)
+  setUserInfo(cleanName, cleanEmail)
+}
+
+async function loadBags() {
+  const res = await fetch(`${API_BASE}/bag`)
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || "Kon inzendingen niet laden")
+  return data
+}
+
+async function saveBag() {
+  const token = getToken()
+  if (!token) throw new Error("Klik eerst Start")
+
+  const user = getUserInfo()
+
+  const res = await fetch(`${API_BASE}/bag`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      naam: config.naam,
+      smaak: config.smaak,
+      kleur: config.kleur,
+      image: config.image,
+      previewImage: getCanvasPreviewDataUrl(),
+      submittedByName: user.name,
+      submittedByEmail: user.email
+    })
+  })
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || "Fout bij opslaan")
+  return data
+}
+
+async function voteForBag(bagId) {
+  const token = getToken()
+  if (!token) throw new Error("Klik eerst Start")
+  if (!hasSubmitted) throw new Error("Dien eerst je eigen chipszak in")
+
+  const res = await fetch(`${API_BASE}/vote/${bagId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  })
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || "Stemmen faalde")
+  return data
+}
+
+/* ================= CAROUSEL ================= */
+function setCarouselIndex(i) {
+  if (!carouselBags.length) return
+  carouselIndex = (i + carouselBags.length) % carouselBags.length
+  renderCarousel()
+}
+
+function renderCarousel() {
+  if (!carouselBags.length) {
+    voteName.textContent = "Geen inzendingen"
+    voteFlavor.textContent = ""
+    voteColor.style.background = "#ddd"
+    voteBtn.disabled = true
+    prevBtn.disabled = true
+    nextBtn.disabled = true
+
+    if (votePreviewImg) {
+      votePreviewImg.src = ""
+      votePreviewImg.style.display = "none"
+    }
+    return
+  }
+
+  const b = carouselBags[carouselIndex]
+  voteName.textContent = b.naam || "Zonder naam"
+  voteFlavor.textContent = b.smaak || ""
+  voteColor.style.background = b.kleur || "#ddd"
+
+  if (votePreviewImg) {
+    votePreviewImg.src = b.previewImage || ""
+    votePreviewImg.style.display = b.previewImage ? "block" : "none"
+  }
+
+  voteBtn.disabled = false
+  prevBtn.disabled = false
+  nextBtn.disabled = false
+}
+
+async function buildCarousel() {
+  const all = await loadBags()
+  carouselBags = (all || []).filter(b => b._id !== myBagId)
+  carouselIndex = 0
+  renderCarousel()
+}
 
 /* ================= UI EVENTS ================= */
 naamInput.addEventListener("focus", () => moveCamera(cameraPos.name))
@@ -502,7 +506,6 @@ smaakInput.addEventListener("input", e => {
   updateSubmitState()
 })
 
-
 kleurButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     kleurButtons.forEach(b => b.classList.remove("active"))
@@ -513,50 +516,50 @@ kleurButtons.forEach(btn => {
   })
 })
 
-imgGrid.addEventListener("click", e => {
-  const btn = e.target.closest(".img-card")
-  if (!btn) return
+if (imgGrid) {
+  imgGrid.addEventListener("click", e => {
+    const btn = e.target.closest(".img-card")
+    if (!btn) return
 
-  const filename = btn.dataset.img
-  if (!filename) return
+    const filename = btn.dataset.img
+    if (!filename) return
 
-  imgGrid.querySelectorAll(".img-card").forEach(b => b.classList.remove("selected"))
-  btn.classList.add("selected")
+    imgGrid.querySelectorAll(".img-card").forEach(b => b.classList.remove("selected"))
+    btn.classList.add("selected")
 
-  console.log("clicked image:", filename, "imageMesh?", !!imageMesh)
-  setImageOnBag(filename)
-})
-
+    setImageOnBag(filename)
+  })
+}
 
 /* Wizard nav */
-dot1.addEventListener("click", () => setStep(1))
-dot2.addEventListener("click", () => {
+if (dot1) dot1.addEventListener("click", () => setStep(1))
+if (dot2) dot2.addEventListener("click", () => {
   if (step1Valid()) setStep(2)
 })
-dot3.addEventListener("click", () => {
+if (dot3) dot3.addEventListener("click", () => {
   if (step1Valid() && step2Valid()) setStep(3)
 })
-dot4.addEventListener("click", () => {
+if (dot4) dot4.addEventListener("click", () => {
   if (step1Valid() && step2Valid() && step3Valid()) setStep(4)
 })
 
-nextBtnWizard.addEventListener("click", () => {
+if (nextBtnWizard) nextBtnWizard.addEventListener("click", () => {
   if (!step1Valid()) return
   setStep(2)
 })
-prevBtnWizard.addEventListener("click", () => setStep(1))
+if (prevBtnWizard) prevBtnWizard.addEventListener("click", () => setStep(1))
 
-nextBtnWizard2.addEventListener("click", () => {
+if (nextBtnWizard2) nextBtnWizard2.addEventListener("click", () => {
   if (!step2Valid()) return
   setStep(3)
 })
-prevBtnWizard2.addEventListener("click", () => setStep(2))
+if (prevBtnWizard2) prevBtnWizard2.addEventListener("click", () => setStep(2))
 
-nextBtnWizard3.addEventListener("click", () => {
+if (nextBtnWizard3) nextBtnWizard3.addEventListener("click", () => {
   if (!step3Valid()) return
   setStep(4)
 })
-prevBtnWizard3.addEventListener("click", () => setStep(3))
+if (prevBtnWizard3) prevBtnWizard3.addEventListener("click", () => setStep(3))
 
 /* Auth */
 startBtn.addEventListener("click", async () => {
@@ -597,14 +600,6 @@ opslaanBtn.addEventListener("click", async () => {
   statusP.textContent = ""
   voteStatus.textContent = ""
 
-    console.log("SUBMIT START", {
-    token: !!getToken(),
-    naam: config.naam,
-    smaak: config.smaak,
-    kleur: config.kleur,
-    image: config.image
-  })
-
   try {
     const saved = await saveBag()
 
@@ -618,10 +613,8 @@ opslaanBtn.addEventListener("click", async () => {
     await buildCarousel()
     openVoteOverlay()
   } catch (e) {
-    console.log("SUBMIT FAIL", e)
     statusP.textContent = e.message || "Fout bij opslaan"
   }
-
 })
 
 /* Vote overlay */
@@ -650,7 +643,6 @@ voteBtn.addEventListener("click", async () => {
 })
 
 /* ================= INIT ================= */
-
 const u = getUserInfo()
 if (u.name) userNameInput.value = u.name
 if (u.email) userEmailInput.value = u.email
