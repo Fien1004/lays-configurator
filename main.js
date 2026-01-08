@@ -233,10 +233,15 @@ scene.add(floor)
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 controls.enablePan = false
+
+controls.minDistance = 1
+controls.maxDistance = 2.4
+
 controls.minAzimuthAngle = -Math.PI * 0.25
 controls.maxAzimuthAngle = Math.PI * 0.25
 controls.minPolarAngle = Math.PI * 0.35
 controls.maxPolarAngle = Math.PI * 0.65
+
 controls.target.set(0, 0.45, 0)
 controls.update()
 
