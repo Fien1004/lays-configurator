@@ -3,9 +3,7 @@ import { getToken, setToken, setUserInfo } from "./storage.js"
 
 export const API_BASE = import.meta.env.VITE_API_BASE
 
-if (!API_BASE) {
-  throw new Error("VITE_API_BASE ontbreekt. Zet hem in .env en in Vercel env vars.")
-}
+console.log("API_BASE =", import.meta.env.VITE_API_BASE)
 
 export async function startGuestSession(username, email) {
   const cleanName = (username || "").trim().slice(0, 20)
