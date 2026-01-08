@@ -1,7 +1,7 @@
 // src/shared/api.js
 import { getToken, setToken, setUserInfo } from "./storage.js"
 
-export const API_BASE = "https://lays-api-6rne.onrender.com"
+export const API_BASE = import.meta.env.VITE_API_BASE
 
 export async function startGuestSession(username, email) {
   const cleanName = (username || "").trim().slice(0, 20)
